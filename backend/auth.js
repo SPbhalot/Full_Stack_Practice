@@ -34,11 +34,11 @@ const transporter = nodemailer.createTransport({
    expirationTime = currentTime + 3 * 60 * 1000; 
    const htmlTemplate = template({otp});
    const info = await transporter.sendMail({
-      from: 'bhalotKk@gmail.com', // sender address
-      to: email, // list of receivers
-      subject: "no-reply-OTP", // Subject line
-      text: "", // plain text body
-      html: htmlTemplate // html body
+      from: 'bhalotKk@gmail.com', 
+      to: email, 
+      subject: "no-reply-OTP", 
+      text: "", 
+      html: htmlTemplate 
     },(err,data)=>{
       if(err) {
          console.log(err);
@@ -46,7 +46,7 @@ const transporter = nodemailer.createTransport({
          console.log('Email sent successfully');
      }
     });
-    
+
     let OptCreation=new otpStore({
       email:email,
       Otp:otp
@@ -63,7 +63,7 @@ auth.post('/registration',async (req,res)=>{
       if(!validation.emailValidation(req.body.email)){
          res.send({
             "Status":0,
-            "Msg":"email id is not valid"
+            "Msg":"email id is not valid" 
          })
          return ;
       }
@@ -77,7 +77,7 @@ auth.post('/registration',async (req,res)=>{
    let newUser=new user({
       name:req.body.name,
       email:req.body.email,
-      password:req.body.password
+      password:req.body.password 
     })
     newUser.save().then(()=>{
       SentMailService(req.body.email)
@@ -91,11 +91,10 @@ auth.post('/registration',async (req,res)=>{
    }else{
       res.send({
          "Status":0,
-         "Msg":"email is registred"
+         "Msg":"email is already registred"
       })
    }
-   
-})
+}) 
 
 
 auth.post('/login',async (req,res)=>{
@@ -103,15 +102,49 @@ auth.post('/login',async (req,res)=>{
    let token=jwt.sign(req.body,secretKey, {expiresIn: '24h'})
    const Exist = await user.findOne({"email":email,'password':password});
    if(Exist){
+      console.log("hello")
    res.send({
       "Status":1,
       "Token":token,
       "Msg":"Welcome back",
-   })
+   }) 
 }else{
    res.status(401).send({
       "Status":0,
       "Error":"User credential wrong"
+   })
+}
+})
+auth.post('/update_password',async (req,res)=>{
+   const {email,password}=req.body
+   const Exist = await user.findOneAndUpdate({"email":email},{"email":email,'password':password});
+   if(Exist){
+   res.send({
+      "Status":1,
+      "Msg":"password successfully updated",
+   })
+}else{
+   res.status(401).send({
+      "Status":0,
+      "Error":"password not update"
+   })
+}
+})
+
+
+auth.post('/send_otp',async (req,res)=>{
+   const {email}=req.body
+   const Exist = await user.findOne({"email":email});
+   if(Exist){
+      SentMailService(req.body.email)
+   res.send({
+      "Status":1,
+      "Msg":"OTP sent successfully",
+   })
+}else{
+   res.status(401).send({
+      "Status":0,
+      "Error":"Email is not available"
    })
 }
 })
@@ -129,7 +162,7 @@ auth.post('/verifyOtp',async (req, res)=>{
          "Error":"otp is verified"
       });
     }else{
-      return res.status(200).send({
+      return res.status(401).send({
          "Status":0,
          "Error":"otp is invalid"
       });

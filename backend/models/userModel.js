@@ -2,7 +2,6 @@ const mongoos = require('mongoose')
 const userSchema = mongoos.Schema({
     name:{
         type:String,
-        required: true,
     },
     email:{
         type:String,
